@@ -16,6 +16,12 @@ import { SKILL, STYLE_IDS, STYLES, type StyleId } from '../poker/styles';
 import { el, render } from './ui';
 
 const ONLINE = import.meta.env.VITE_TARGET !== 'play';
+/**
+ * Ranked (server-checked) runs are off: the server replays the whole tournament for every action, which
+ * outgrows the free plan's per-request CPU budget within a few dozen actions. Turn on only once replay is
+ * cheap (e.g. the run stores game state). Until then every run is local, online or not.
+ */
+const RANKED = false;
 
 /** Everything tunable about the client. */
 const UI = {
@@ -263,7 +269,7 @@ async function start(): Promise<void> {
   const opponents = prefs.opponents.slice(0, prefs.seats - 1);
   let seed = randomSeed();
   let ranked: Session['ranked'] = null;
-  if (ONLINE) {
+  if (ONLINE && RANKED) {
     configureClient({ basePath: `/${config.id}` });
     const s = await api.soloStart(config.id);
     if (s) {
