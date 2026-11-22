@@ -1,0 +1,12 @@
+{
+  "seconds": 7,
+  "selector": "#app",
+  "steps": [
+    { "tap": "button.primary" },
+    { "wait": 6000 },
+    { "start": true },
+    { "wait": 1800 },
+    { "tap": ".act-btn.best" },
+    { "wait": 2500 }
+  ]
+}

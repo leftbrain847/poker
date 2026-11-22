@@ -1,27 +1,19 @@
-# Secrets: never committed
-.env
-.env.*
-!.env.example
+node_modules/
+dist/
+*.log
+.vite/
+coverage/
+.claude/worktrees/
+
+# Secrets and local Cloudflare state: never committed.
 .dev.vars
 .dev.vars.*
+.env
+.env.*
+.wrangler/
+
+# Android signing material: never committed.
+*.jks
+*.keystore
 *.pem
 *.key
-
-# Dependencies, caches, build junk
-node_modules/
-.venv/
-venv/
-__pycache__/
-*.pyc
-.pytest_cache/
-coverage/
-*.log
-
-# OS and editor files
-.DS_Store
-Thumbs.db
-.idea/
-.vscode/
-
-# Claude Code
-.claude/worktrees/

@@ -1,8 +1,8 @@
 # Read nightly by leftbrain847/index. /new-project fills this in; edit any time.
-theme: ""             # one of the index's config.themes
+theme: games          # one of the index's config.themes
 tags: []              # from the index's config.tags; new tags lowercase_with_underscores
-what: ""              # one line on what this is
-next: ""              # the next step
-active: false         # true pulls this repo's tasks into J's queue
-public: false         # informational; each sprint day's snapshot decides publishing
+what: "ICM-aware NLHE Double Up trainer: GTO vs max-exploit advice against selectable opponent styles"
+next: "Strategy layer (bots + coach EVs), table UI with coach panel, day-1 snapshot"
+active: true          # true pulls this repo's tasks into J's queue
+public: true          # informational; each sprint day's snapshot decides publishing
 settings_done: false  # J sets the repo settings listed in CLAUDE.md, then this flips to true

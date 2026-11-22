@@ -1,0 +1,5 @@
+{
+  "appId": "com.example.apps.poker",
+  "appName": "Poker Coach",
+  "webDir": "dist/play"
+}
