@@ -1,37 +1,45 @@
 import { describe, expect, it } from 'vitest';
-import { app, applySegment, DEFAULT_RULES, face, startRun } from '../src/app';
+import { app, applySegment, DEFAULT_RULES, replay, startRun, tourneyConfig, type OpponentSetup, type Run } from '../src/app';
+import { heroToAct } from '../src/poker/game';
+import { menu } from '../src/poker/strategy';
 
-describe('app rules', () => {
-  it('is deterministic: the same seed gives the same dice', () => {
-    expect([1, 2, 3].map((p) => face(42, p))).toEqual([1, 2, 3].map((p) => face(42, p)));
-    for (let p = 1; p <= 50; p++) expect(face(7, p)).toBeGreaterThanOrEqual(1);
+const OPPS: OpponentSetup[] = [
+  { style: 'nit', skill: 3 },
+  { style: 'maniac', skill: 3 },
+  { style: 'station', skill: 2 },
+  { style: 'lag', skill: 4 },
+  { style: 'tag', skill: 4 },
+];
+
+describe('solo run contract', () => {
+  it('pays the top half: 6 players, 3 paid; 9 players, 4 paid', () => {
+    expect(tourneyConfig(DEFAULT_RULES, 6).paid).toBe(3);
+    expect(tourneyConfig(DEFAULT_RULES, 9).paid).toBe(4);
   });
-
-  it('scores right and wrong guesses, and rejects plays out of order', () => {
+  it('rejects bad setups and actions before setup', () => {
     const run = startRun(42);
-    const right = applySegment(DEFAULT_RULES, run, { play: 1, guess: face(42, 1) });
-    expect(right?.points).toBe(DEFAULT_RULES.rightPoints);
-    expect(applySegment(DEFAULT_RULES, run, { play: 2, guess: 1 })).toBeNull();
+    expect(applySegment(DEFAULT_RULES, run, { id: 'fold' })).toBeNull();
+    expect(applySegment(DEFAULT_RULES, run, { opponents: [] })).toBeNull();
+    expect(app.solo!.parseSegment({ opponents: [{ style: 'shark', skill: 3 }] })).toBeNull();
+    expect(app.solo!.parseSegment({ id: 'fold' })).toEqual({ id: 'fold' });
   });
-
-  it('the server replays a run to the same score the client shows', () => {
-    const solo = app.solo!;
-    let server = solo.start(app.defaultConfig, 9);
-    let client = startRun(9);
-    for (let play = 1; play <= DEFAULT_RULES.plays; play++) {
-      const seg = solo.parseSegment(JSON.parse(JSON.stringify({ play, guess: 3 })));
-      expect(seg).not.toBeNull();
-      const out = solo.apply(app.defaultConfig, server, seg!);
-      if ('error' in out) throw new Error(out.error);
-      server = out.run;
-      client = applySegment(DEFAULT_RULES, client, { play, guess: 3 })!;
+  it('replays deterministically: the same seed and actions give the same game', () => {
+    let run: Run | null = applySegment(DEFAULT_RULES, startRun(7), { opponents: OPPS });
+    expect(run).not.toBeNull();
+    // Play the first few hero decisions with the first menu option that isn't fold (or fold).
+    for (let i = 0; i < 4 && run && !run.over; i++) {
+      const g = replay(DEFAULT_RULES, run)!;
+      expect(heroToAct(g)).toBe(true);
+      const opts = menu(g.t);
+      const pick = opts.find((o) => o.kind === 'call' || o.kind === 'check') ?? opts[0]!;
+      run = applySegment(DEFAULT_RULES, run, { id: pick.id });
     }
-    expect(solo.isOver(server)).toBe(true);
-    expect(solo.score(server)).toBe(client.points);
-  });
-
-  it('rejects malformed segments', () => {
-    const solo = app.solo!;
-    for (const bad of [null, [], { play: 1 }, { play: 1, guess: 7 }, { play: '1', guess: 2 }, { play: 1, guess: 2, extra: 1 }]) expect(solo.parseSegment(bad)).toBeNull();
-  });
+    expect(run).not.toBeNull();
+    const a = replay(DEFAULT_RULES, run!)!;
+    const b = replay(DEFAULT_RULES, run!)!;
+    expect(JSON.stringify(a.t.players.map((p) => p.stack))).toBe(JSON.stringify(b.t.players.map((p) => p.stack)));
+    expect(a.t.handNo).toBe(b.t.handNo);
+    // an option id that isn't on the menu is refused
+    expect(applySegment(DEFAULT_RULES, run!, { id: 'nonsense' })).toBeNull();
+  }, 60000);
 });

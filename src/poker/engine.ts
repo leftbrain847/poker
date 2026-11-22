@@ -84,6 +84,8 @@ export interface HandState {
   pending: number[];
   /** Seats that have acted since the last full raise: a short all-in doesn't let them re-raise. */
   acted: number[];
+  /** Set on a look-ahead copy when its betting round has ended. */
+  frozen?: boolean;
   log: LoggedAction[];
   results: Showdown[] | null;
   /** Antes and blinds of this hand, for the record. */
@@ -99,6 +101,11 @@ export interface Tourney {
   over: boolean;
   /** Seat of the next button. */
   nextButton: number;
+  /**
+   * Look-ahead copies (the coach's what-ifs) stop when a betting round ends or one player is left,
+   * without dealing or settling the pot, so no random runout leaks into an EV estimate.
+   */
+  lookahead?: boolean;
 }
 
 export const STREET_NAMES = ['Preflop', 'Flop', 'Turn', 'River'];
@@ -327,13 +334,20 @@ function orderAfter(t: Tourney, seat: number): number[] {
 
 const inHand = (t: Tourney): Player[] => t.players.filter((p) => p.place === 0 && p.hole && !p.folded);
 
-export const potTotal = (t: Tourney): number => t.players.reduce((s, p) => s + p.committed, 0);
+export const potTotal = (t: Tourney): number => (!t.hand || t.hand.street === 4 ? 0 : t.players.reduce((s, p) => s + p.committed, 0));
 
 /** Move to the next player, the next street, or the showdown. */
 function advance(t: Tourney): void {
   const h = t.hand!;
   const live = inHand(t);
+  const freeze = () => {
+    returnUncalled(t);
+    h.toAct = -1;
+    h.pending = [];
+    h.frozen = true;
+  };
   if (live.length === 1) {
+    if (t.lookahead) return freeze();
     award(t);
     return;
   }
@@ -353,6 +367,7 @@ function advance(t: Tourney): void {
     }
   }
   // Betting round over: return any uncalled chips, then deal on.
+  if (t.lookahead) return freeze();
   returnUncalled(t);
   const canAct = live.filter((p) => !p.allIn);
   if (h.street === 3) {

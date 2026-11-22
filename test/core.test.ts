@@ -35,7 +35,7 @@ describe('preflop equity table', () => {
     near(eqClass(classByName('AKs'), classByName('QQ')), 0.46);
     near(eqClass(classByName('AKo'), classByName('22')), 0.47);
     near(eqClass(classByName('72o'), classByName('AA')), 0.125);
-    near(eqClass(classByName('JTs'), classByName('AKo')), 0.415, 0.015);
+    near(eqClass(classByName('JTs'), classByName('AKo')), 0.4052, 0.005); // exact enumeration, averaged over suit patterns
   });
   it('AA vs a random hand is about 85%', () => near(eqVsRange(classByName('AA'), fullRange()), 0.852, 0.01));
   it('a random hand vs random is 50%', () => near(rangeVsRange(fullRange(), fullRange()), 0.5, 0.005));

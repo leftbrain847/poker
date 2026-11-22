@@ -56,4 +56,8 @@ An app built on app_builder. The platform rules live in `platform/SPEC.md`: read
 
 ## App-specific notes
 
-(Add this app's own decisions here as they're made.)
+- **Format:** NLHE Double Up, top half paid equally; antes rise fast (`LEVELS` in `src/app.ts`) so play reaches ICM push/fold.
+- **Theory stack (src/poker/):** `icm.ts` (Malmuth–Harville), `nash.ts` (ICM all-in equilibrium), `strategy.ts` (policies for every model; `STRATEGY` holds every tunable), `coach.ts` (EVs and advice), `game.ts` (ranges narrowed by Bayes after each action).
+- **Honesty rule:** anything not solved exactly is labelled "Approximation" in the UI. Don't present framework numbers as solver output.
+- **Determinism:** bots, ranges and the coach are seeded from the tournament seed; cached range rankings are seeded from their inputs, so a server replay matches the client.
+- **Hero actions** are the abstract options from `menu()` (fold/check/call/raise/small/big/allin), so advice maps exactly to buttons.
