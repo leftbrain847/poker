@@ -1,10 +1,24 @@
+# Monthly, grouped: at most one PR for minor/patch updates and one for major ones (majors need a look:
+# they can change build output or tooling). platform/ is vendored by app_builder's sync and not watched.
 version: 2
 updates:
-  - package-ecosystem: github-actions
-    directory: /
+  - package-ecosystem: npm
+    assignees: [leftbrain847]
+    directory: "/"
     schedule:
       interval: monthly
+    open-pull-requests-limit: 5
+    groups:
+      minor_and_patch:
+        update-types: [minor, patch]
+      majors:
+        update-types: [major]
+  - package-ecosystem: github-actions
     assignees: [leftbrain847]
+    directory: "/"
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 5
     groups:
       all:
         patterns: ["*"]

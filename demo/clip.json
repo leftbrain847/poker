@@ -1,0 +1,9 @@
+{
+  "seconds": 6,
+  "selector": "#app",
+  "steps": [
+    { "wait": 600 },
+    { "start": true },
+    { "wait": 400 }
+  ]
+}

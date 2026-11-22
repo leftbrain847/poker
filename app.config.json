@@ -1,0 +1,24 @@
+{
+  "$comment": "Everything tunable about this app lives here. create-app fills id, title and mode; the rest has defaults.",
+  "id": "poker",
+  "title": "Poker Coach",
+  "mode": "solo",
+  "host": {
+    "emptyRoomTtlMs": 300000
+  },
+  "sprint": {
+    "timeZone": "America/New_York",
+    "public": true
+  },
+  "targets": {
+    "friends": {
+      "enabled": true
+    },
+    "play": {
+      "enabled": true,
+      "versionName": "0.1.0",
+      "multiplayer": false,
+      "appId": "com.example.apps.poker"
+    }
+  }
+}

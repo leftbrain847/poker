@@ -1,0 +1,30 @@
+{
+  "name": "poker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "build:play": "VITE_TARGET=play vite build && node scripts/check-play-bundle.mjs",
+    "build:demo": "vite build -c demo/vite.config.ts && node demo/inline.mjs && node demo/check-clip.mjs",
+    "snapshot": "npm run build:demo && node demo/snapshot.mjs",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "worker:dev": "npm run build && wrangler dev",
+    "deploy": "npm run build && wrangler deploy",
+    "smoke": "node scripts/smoke.mjs",
+    "gen:equity": "esbuild tools/gen-equity.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/gen-equity.mjs --log-level=warning && node node_modules/.cache/gen-equity.mjs"
+  },
+  "dependencies": {
+    "@app-builder/client-sdk": "file:platform/client-sdk",
+    "@app-builder/host": "file:platform/host"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "5.20261115.1",
+    "typescript": "5.9.3",
+    "vite": "7.3.7",
+    "vitest": "5.1.1",
+    "wrangler": "4.162.0"
+  }
+}
